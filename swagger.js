@@ -6,14 +6,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export const swaggerSpec = swaggerJsdoc({
-  definition: { ...existing config... },
-  apis: [join(__dirname, "server.js")],  
-});
   definition: {
     openapi: "3.0.0",
     info: {
       title: "Books API",
       version: "1.0.0",
+      description: "Books REST API - use Bearer token to authorize",
     },
     components: {
       securitySchemes: {
@@ -48,17 +46,16 @@ export const swaggerSpec = swaggerJsdoc({
       },
     },
   },
-  apis: [join(__dirname, "server.js"],
+  apis: [join(__dirname, "server.js")],
 });
 
 export const redocHtml = `
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Books API — ReDoc</title>
+    <title>Books API - ReDoc</title>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700|Roboto:300,400,700" rel="stylesheet">
     <style>body { margin: 0; padding: 0; }</style>
   </head>
   <body>
