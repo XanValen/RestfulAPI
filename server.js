@@ -33,6 +33,9 @@ app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.get("/redoc", (_req, res) => res.send(redocHtml));
 app.get("/openapi.json", (_req, res) => res.json(swaggerSpec));
 
+app.get("/", (_req, res) => {
+  res.json({ message: "Books API", docs: "/docs", health: "/health" });
+});
 
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", message: "Books API is running 📚" });
