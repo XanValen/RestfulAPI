@@ -6,13 +6,6 @@ export const swaggerSpec = swaggerJsdoc({
     info: {
       title: "Books API",
       version: "1.0.0",
-      description: `
-## 📚 Books REST API
-
-A fully-featured RESTful API for managing a **books** database.
-
-**Auth:** Click the 🔒 Authorize button and enter \`Bearer your-super-secret-key\`
-      `,
     },
     components: {
       securitySchemes: {
