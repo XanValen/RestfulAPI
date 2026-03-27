@@ -1,6 +1,14 @@
 import swaggerJsdoc from "swagger-jsdoc";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 export const swaggerSpec = swaggerJsdoc({
+  definition: { ...existing config... },
+  apis: [join(__dirname, "server.js")],  
+});
   definition: {
     openapi: "3.0.0",
     info: {
@@ -40,7 +48,7 @@ export const swaggerSpec = swaggerJsdoc({
       },
     },
   },
-  apis: ["/opt/render/project/src/server.js"],
+  apis: [join(__dirname, "server.js"],
 });
 
 export const redocHtml = `
