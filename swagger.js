@@ -40,7 +40,7 @@ export const swaggerSpec = swaggerJsdoc({
       },
     },
   },
-  apis: ["./server.js"],
+  apis: ["/opt/render/project/src/server.js"],
 });
 
 export const redocHtml = `
