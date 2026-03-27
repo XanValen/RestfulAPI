@@ -11,6 +11,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// ── Supabase ──────────────────────────────────────────────────────────────────
 function getSupabase() {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_KEY;
@@ -18,6 +19,7 @@ function getSupabase() {
   return createClient(url, key);
 }
 
+// ── Auth middleware ───────────────────────────────────────────────────────────
 const SECRET_KEY = process.env.SECRET_KEY || "your-super-secret-key";
 
 function requireAuth(req, res, next) {
@@ -29,18 +31,41 @@ function requireAuth(req, res, next) {
   next();
 }
 
+// ── Docs ──────────────────────────────────────────────────────────────────────
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.get("/redoc", (_req, res) => res.send(redocHtml));
 app.get("/openapi.json", (_req, res) => res.json(swaggerSpec));
 
-app.get("/", (_req, res) => {
-  res.json({ message: "Books API", docs: "/docs", health: "/health" });
-});
-
+// ── Health ────────────────────────────────────────────────────────────────────
+/**
+ * @swagger
+ * /health:
+ *   get:
+ *     summary: Health check
+ *     tags: [Health]
+ *     responses:
+ *       200:
+ *         description: API is running
+ */
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", message: "Books API is running 📚" });
 });
 
+// ── GET all books ─────────────────────────────────────────────────────────────
+/**
+ * @swagger
+ * /books:
+ *   get:
+ *     summary: Get all books
+ *     tags: [Books]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of all books
+ *       401:
+ *         description: Unauthorized
+ */
 app.get("/books", requireAuth, async (_req, res) => {
   try {
     const sb = getSupabase();
@@ -52,6 +77,27 @@ app.get("/books", requireAuth, async (_req, res) => {
   }
 });
 
+// ── GET one book ──────────────────────────────────────────────────────────────
+/**
+ * @swagger
+ * /books/{id}:
+ *   get:
+ *     summary: Get a book by ID
+ *     tags: [Books]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: A single book
+ *       404:
+ *         description: Not found
+ */
 app.get("/books/:id", requireAuth, async (req, res) => {
   try {
     const sb = getSupabase();
@@ -67,6 +113,27 @@ app.get("/books/:id", requireAuth, async (req, res) => {
   }
 });
 
+// ── POST create book ──────────────────────────────────────────────────────────
+/**
+ * @swagger
+ * /books:
+ *   post:
+ *     summary: Create a new book
+ *     tags: [Books]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/BookCreate'
+ *     responses:
+ *       201:
+ *         description: Book created
+ *       400:
+ *         description: Bad request
+ */
 app.post("/books", requireAuth, async (req, res) => {
   try {
     const { title, author, genre, published_year, isbn } = req.body;
@@ -86,6 +153,33 @@ app.post("/books", requireAuth, async (req, res) => {
   }
 });
 
+// ── PUT update book ───────────────────────────────────────────────────────────
+/**
+ * @swagger
+ * /books/{id}:
+ *   put:
+ *     summary: Update a book
+ *     tags: [Books]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/BookUpdate'
+ *     responses:
+ *       200:
+ *         description: Book updated
+ *       404:
+ *         description: Not found
+ */
 app.put("/books/:id", requireAuth, async (req, res) => {
   try {
     const sb = getSupabase();
@@ -117,6 +211,27 @@ app.put("/books/:id", requireAuth, async (req, res) => {
   }
 });
 
+// ── DELETE book ───────────────────────────────────────────────────────────────
+/**
+ * @swagger
+ * /books/{id}:
+ *   delete:
+ *     summary: Delete a book
+ *     tags: [Books]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Book deleted
+ *       404:
+ *         description: Not found
+ */
 app.delete("/books/:id", requireAuth, async (req, res) => {
   try {
     const sb = getSupabase();
@@ -135,6 +250,26 @@ app.delete("/books/:id", requireAuth, async (req, res) => {
   }
 });
 
+// ── Search by genre ───────────────────────────────────────────────────────────
+/**
+ * @swagger
+ * /books/search/genre/{genre}:
+ *   get:
+ *     summary: Search books by genre
+ *     tags: [Books]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: genre
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: Fantasy
+ *     responses:
+ *       200:
+ *         description: Filtered list of books
+ */
 app.get("/books/search/genre/:genre", requireAuth, async (req, res) => {
   try {
     const sb = getSupabase();
@@ -149,9 +284,10 @@ app.get("/books/search/genre/:genre", requireAuth, async (req, res) => {
   }
 });
 
+// ── Start ─────────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 8001;
 app.listen(PORT, () => {
-  console.log(`Books API running on http://localhost:${PORT}`);
+  console.log(`📚 Books API running on http://localhost:${PORT}`);
   console.log(`   Swagger UI → http://localhost:${PORT}/docs`);
   console.log(`   ReDoc      → http://localhost:${PORT}/redoc`);
 });
